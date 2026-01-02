@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para a Fran</title>
+    <style>
+        :root {
+            --primary-pink: #ffb7c5;
+            --deep-pink: #ff4d6d;
+            --soft-pink: #ffe5ec;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ffb7c5 0%, #f8adff 100%);
+            font-family: 'Georgia', serif;
+            color: #4a4a4a;
+            overflow-x: hidden;
+        }
+
+        .heart-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            animation: float 6s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(110vh) scale(1); opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+
+        .music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            z-index: 100;
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0px rgba(255, 77, 109, 0.4); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(255, 77, 109, 0); }
+            100% { transform: scale(1); }
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 3.2rem;
+            text-shadow: 2px 4px 15px rgba(0,0,0,0.1);
+            margin: 0;
+        }
+
+        .highlights {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: 0.3s;
+        }
+
+        .card:hover { background: white; transform: translateY(-5px); }
+        .card span { font-size: 2rem; display: block; }
+        .card b { display: block; color: var(--deep-pink); font-size: 0.9rem; margin-top: 8px; }
+
+        #status-msg {
+            height: 70px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.1);
+            max-width: 300px;
+        }
+
+        .letter-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 15px;
+        }
+
+        .btn-open {
+            background-color: var(--deep-pink);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.4);
+            font-weight: bold;
+        }
+
+        .letter-container {
+            display: none;
+            width: 100%;
+            max-width: 650px;
+            position: relative;
+            animation: slideUp 0.8s ease;
+        }
+
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .letter {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border-left: 8px solid var(--deep-pink);
+        }
+
+        .btn-close {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--deep-pink);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .letter-text {
+            font-size: 1.15rem;
+            color: #333;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .signature {
+            margin-top: 35px;
+            font-weight: bold;
+            color: var(--deep-pink);
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            display: none;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 25px;
+            color: white;
+            font-size: 3rem;
+            animation: bounce 2s infinite;
+            text-decoration: none;
+        }
+
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
+
+        .click-heart {
+            position: fixed;
+            pointer-events: none;
+            animation: popOut 0.8s forwards;
+            z-index: 9999;
+        }
+
+        @keyframes popOut { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(2) translateY(-50px); opacity: 0; } }
+    </style>
+</head>
+<body onclick="spawnHeart(event)">
+
+    <audio id="myAudio" loop>
+        <source src="https://docs.google.com/uc?export=download&id=1Gs4I9cCt5u859MCUfc9oMVZMEr8iN8Bw" type="audio/mpeg">
+    </audio>
+
+    <div class="music-control" onclick="toggleMusic()">🎵</div>
+
+    <section class="hero">
+        <h1>Pra você, Fran ❤️</h1>
+        <div class="highlights">
+            <div class="card" onclick="interact('⌛', 'O que eu sinto atravessou o tempo.')">
+                <span>⌛</span><b>4 Anos</b>
+            </div>
+            <div class="card" onclick="interact('🌱', 'Aprendi com cada erro do passado.')">
+                <span>🌱</span><b>Evolução</b>
+            </div>
+            <div class="card" onclick="interact('✨', 'Você continua sendo a mais perfeita.')">
+                <span>✨</span><b>Perfeição</b>
+            </div>
+            <div class="card" onclick="interact('💍', 'Sonho com viagens e família com você.')">
+                <span>💍</span><b>O Futuro</b>
+            </div>
+        </div>
+        <div id="status-msg">Toque na nota musical para ouvir... 🎵</div>
+        <a href="#carta" class="scroll-indicator">↓</a>
+    </section>
+
+    <section class="letter-section" id="carta">
+        <button class="btn-open" id="openBtn" onclick="revealLetter()">Abrir o que sinto 💌</button>
+
+        <div class="letter-container" id="letterContainer">
+            <button class="btn-close" onclick="closeLetter()">X</button>
+            <div class="letter">
+                <div style="text-align: right; font-style: italic; color: #bbb; margin-bottom: 20px;">1 de janeiro de 2026</div>
+                <div class="letter-text" id="typewriter"></div>
+                <div class="signature" id="signature">
+                    Eu, Miguel Valério, prometo e juro que eu vou cuidar de cada parte de você delicadamente. ❤️
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const audio = document.getElementById("myAudio");
+        const texto = `Eu te amo sabia, por mais que vários meninos queiram você, algum deles tentou por 4 anos? Algum deles te dava cartas clichê, algum deles já teve que ver o amor da vida do lado de outra pessoa... eu realmente quero você e não quero só ficar pra me achar foda pq eu peguei uma mulher, se eu quisesse não tinha esperado tanto tempo por alguém que eu realmente amasse de vdd sendo que essa pessoa já esteve na minha vida.
+
+Eu sei que eu errei com você in 2023, e foi coisas bestas que fez eu te perder e eu mesmo me perder, eu quero que você seja a mulher da minha vida não só um namorinho de adolescente, quero que dure pra vida, e se você não quiser eu realmente vou respeitar sua opinião e decisão. Você é perfeita e nada tira isso da minha mente, quero te assumir pra minha família te dar flores, beijos e te levar pra viagens em família.
+
+Eu te amo, você é a única pessoa além da minha mãe que eu falei te amo e eu quero falar mil te amo pq eu realmente te amo. Eu quero concertar tudo que errei, acredito que agora estamos amadurecidos o suficiente. Mas se você for feliz sem mim, eu vou ser feliz por você, então me perdoa pelos meus erros. Te conhecer foi a melhor coisa que aconteceu na minha vida, te amar foi a melhor escolha.
+
+Eu quero que você seja a mãe dos nossos filhos, quero ter um futuro com você e quero ver eles crescerem. Eu vou te esperar, já esperei por 4 anos e já vai fazer 5 anos, mas lembrando claramente que isso é decisão sua, eu quero uma resposta e vou te respeitar independente da decisão.`;
+
+        let typingStarted = false;
+
+        setInterval(() => {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-particle');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = Math.random() * 10 + 10 + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 6000);
+        }, 500);
+
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play();
+                document.querySelector('.music-control').innerHTML = "⏸️";
+            } else {
+                audio.pause();
+                document.querySelector('.music-control').innerHTML = "🎵";
+            }
+        }
+
+        function interact(emoji, msg) {
+            document.getElementById('status-msg').innerHTML = `<span style="font-size:1.5rem">${emoji}</span><br>${msg}`;
+        }
+
+        function spawnHeart(e) {
+            const h = document.createElement('div');
+            h.innerHTML = '❤️';
+            h.className = 'click-heart';
+            h.style.left = e.clientX + 'px';
+            h.style.top = e.clientY + 'px';
+            document.body.appendChild(h);
+            setTimeout(() => h.remove(), 800);
+        }
+
+        function revealLetter() {
+            document.getElementById('openBtn').style.display = 'none';
+            document.getElementById('letterContainer').style.display = 'block';
+            
+            if(!typingStarted) {
+                typingStarted = true;
+                let i = 0;
+                const container = document.getElementById('typewriter');
+                function type() {
+                    if (i < texto.length) {
+                        container.innerHTML += texto.charAt(i);
+                        i++;
+                        setTimeout(type, 35);
+                        if(i % 10 === 0) window.scrollBy(0, 8);
+                    } else {
+                        document.getElementById('signature').style.display = 'block';
+                    }
+                }
+                type();
+            }
+        }
+
+        function closeLetter() {
+            document.getElementById('letterContainer').style.display = 'none';
+            document.getElementById('openBtn').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
