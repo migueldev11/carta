@@ -8,6 +8,7 @@
         :root {
             --deep-pink: #ff4d6d;
             --soft-pink: #ffb7c5;
+            --gold: #fff5ba;
         }
 
         * { box-sizing: border-box; scroll-behavior: smooth; }
@@ -25,16 +26,29 @@
             overflow-x: hidden;
         }
 
-        .heart-particle {
+        /* Corações e Brilhos */
+        .heart-particle, .sparkle {
             position: fixed;
             pointer-events: none;
             z-index: 1;
             animation: float 6s linear infinite;
         }
 
+        .sparkle {
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white;
+            animation: flash 2s infinite;
+        }
+
         @keyframes float {
             0% { transform: translateY(110vh) scale(1); opacity: 1; }
             100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
 
         .container {
@@ -61,17 +75,20 @@
             cursor: pointer;
             box-shadow: 0 10px 30px rgba(255, 77, 109, 0.4);
             font-weight: bold;
+            transition: all 0.3s ease;
         }
+
+        .btn-open:hover { transform: scale(1.1); }
 
         .letter-container {
             display: none;
             width: 100%;
             max-width: 600px;
             margin: 20px auto;
-            animation: slideUp 0.8s ease;
+            animation: slideUp 1s ease;
         }
 
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .letter {
             background: #fff;
@@ -83,7 +100,7 @@
         }
 
         .letter-text {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             color: #333;
             white-space: pre-wrap;
             line-height: 1.8;
@@ -97,10 +114,25 @@
             border-top: 1px solid #eee;
             padding-top: 20px;
             display: none;
+            animation: pulse-gold 2s infinite;
         }
+
+        @keyframes pulse-gold {
+            0% { text-shadow: 0 0 0px var(--soft-pink); }
+            50% { text-shadow: 0 0 10px var(--soft-pink); }
+            100% { text-shadow: 0 0 0px var(--soft-pink); }
+        }
+
+        .click-heart {
+            position: fixed;
+            pointer-events: none;
+            animation: popOut 0.8s forwards;
+            z-index: 9999;
+        }
+        @keyframes popOut { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(2) translateY(-50px); opacity: 0; } }
     </style>
 </head>
-<body>
+<body onclick="spawnHeart(event)">
 
     <audio id="myAudio" loop>
         <source src="anjos.mp3" type="audio/mpeg">
@@ -117,7 +149,7 @@
                 <div style="text-align: right; font-style: italic; color: #bbb; margin-bottom: 20px;">3 de janeiro de 2026</div>
                 <div class="letter-text" id="typewriter"></div>
                 <div class="signature" id="signature">
-                    Eu, Miguel , prometo e juro que eu vou cuidar de cada parte de você delicadamente, então oque acha ? Vamos voltar e fazer tudo melhor, recomeçar como se fosse a primeira vez? ❤️
+                    Eu, Miguel Valério, prometo e juro que eu vou cuidar de cada parte de você delicadamente. ❤️
                 </div>
             </div>
         </div>
@@ -129,25 +161,30 @@
 
 Eu sei que eu errei com você em 2023, e foi coisas bestas que fez eu te perder e eu mesmo me perder, eu quero que você seja a mulher da minha vida não só um namorinho de adolescente, quero que dure pra vida, e se você não quiser eu realmente vou respeitar sua opinião e decisão. Você é perfeita e nada tira isso da minha mente, quero te assumir pra minha família te dar flores, beijos e te levar pra viagens em família.
 
-Eu te amo, você é a única pessoa além de pessoas da minha família  que eu falei te amo, e eu quero falar mil te amo pq eu realmente te amo. Eu quero concertar tudo que errei, acredito que agora estamos amadurecidos o suficiente. Mas se você for feliz sem mim, eu vou ser feliz por você, então me perdoa pelos meus erros. Te conhecer foi a melhor coisa que aconteceu na minha vida, te amar foi a melhor escolha.
+Eu te amo, você é a única pessoa além da minha mãe que eu falei te amo e eu quero falar mil te amo pq eu realmente te amo. Eu quero concertar tudo que errei, acredito que agora estamos amadurecidos o suficiente. Mas se você for feliz sem mim, eu vou ser feliz por você, então me perdoa pelos meus erros. Te conhecer foi a melhor coisa que aconteceu na minha vida, te amar foi a melhor escolha.
 
 Eu quero que você seja a mãe dos nossos filhos, quero ter um futuro com você e quero ver eles crescerem. Eu vou te esperar, já esperei por 4 anos e já vai fazer 5 anos, mas lembrando claramente que isso é decisão sua, eu quero uma resposta e vou te respeitar independente da decisão.`;
 
         function start() {
-            // Define o início da música (em segundos)
-            // Troque o 70 pelo segundo exato onde começa o refrão gritado
-            audio.currentTime = 1; 
+            // Música começa do começo
             audio.play();
 
             document.getElementById('intro').style.display = 'none';
             document.getElementById('letterContainer').style.display = 'block';
 
+            // Efeito chuva de corações inicial
+            for(let i=0; i<15; i++) {
+                setTimeout(createFloatingHeart, i * 100);
+            }
+
+            // Inicia digitação
             let i = 0;
             function typeWriter() {
                 if (i < texto.length) {
                     document.getElementById("typewriter").innerHTML += texto.charAt(i);
                     i++;
-                    setTimeout(typeWriter, 45);
+                    if(i % 8 === 0) window.scrollBy(0, 10);
+                    setTimeout(typeWriter, 50);
                 } else {
                     document.getElementById('signature').style.display = 'block';
                 }
@@ -155,14 +192,37 @@ Eu quero que você seja a mãe dos nossos filhos, quero ter um futuro com você 
             typeWriter();
         }
 
-        setInterval(() => {
+        function createFloatingHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart-particle');
             heart.innerHTML = '❤️';
             heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = Math.random() * 15 + 10 + 'px';
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 6000);
-        }, 500);
+        }
+
+        // NOVO: Função para criar brilhos (Sparkles)
+        function createSparkle() {
+            const s = document.createElement('div');
+            s.classList.add('sparkle');
+            s.style.width = s.style.height = Math.random() * 5 + 2 + 'px';
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.top = Math.random() * 100 + 'vh';
+            document.body.appendChild(s);
+            setTimeout(() => s.remove(), 2000);
+        }
+
+        function spawnHeart(e) {
+            const h = document.createElement('div');
+            h.innerHTML = '❤️'; h.className = 'click-heart';
+            h.style.left = e.clientX + 'px'; h.style.top = e.clientY + 'px';
+            document.body.appendChild(h);
+            setTimeout(() => h.remove(), 800);
+        }
+
+        setInterval(createFloatingHeart, 600);
+        setInterval(createSparkle, 300); // Brilhos constantes de fundo
     </script>
 </body>
 </html>
